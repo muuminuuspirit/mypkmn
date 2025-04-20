@@ -1,4 +1,4 @@
-package creatures;
+package core.creatures;
 
 public class PetTeam {
 }
