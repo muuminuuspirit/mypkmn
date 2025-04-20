@@ -3,6 +3,9 @@ package com.cedric.game.ui;
 import com.cedric.game.characters.PlayerTrainer;
 import com.cedric.game.core.GameManager;
 import com.cedric.game.core.creature.Creature;
+import com.cedric.game.core.type.Type;
+import com.cedric.game.items.Item;
+import com.cedric.game.items.ItemCategory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -311,7 +314,6 @@ public class GameGUI extends JFrame {
         mainMenuPanel.add(infoPanel, BorderLayout.NORTH);
         mainMenuPanel.add(buttonPanel, BorderLayout.CENTER);
     }
-
     /**
      * Met à jour les informations du menu principal.
      */
@@ -665,3 +667,610 @@ public class GameGUI extends JFrame {
 
         centerPanel.revalidate();
         centerPanel.repaint();
+    }
+
+    /**
+     * Initialise le panneau d'inventaire.
+     */
+    private void initInventoryPanel() {
+        inventoryPanel = new JPanel();
+        inventoryPanel.setLayout(new BorderLayout());
+
+        JLabel titleLabel = new JLabel("MON INVENTAIRE", JLabel.CENTER);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
+
+        JPanel centerPanel = new JPanel();
+        centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
+
+        JScrollPane scrollPane = new JScrollPane(centerPanel);
+
+        JButton backButton = new JButton("Retour au menu");
+        backButton.addActionListener(e -> {
+            updateMainMenu();
+            cardLayout.show(mainPanel, "mainMenu");
+        });
+
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        bottomPanel.add(backButton);
+
+        inventoryPanel.add(titleLabel, BorderLayout.NORTH);
+        inventoryPanel.add(scrollPane, BorderLayout.CENTER);
+        inventoryPanel.add(bottomPanel, BorderLayout.SOUTH);
+    }
+
+    /**
+     * Met à jour le panneau d'inventaire.
+     */
+    private void updateInventoryPanel() {
+        PlayerTrainer player = gameManager.getPlayer();
+
+        JPanel centerPanel = (JPanel) ((JScrollPane) inventoryPanel.getComponent(1)).getViewport().getView();
+        centerPanel.removeAll();
+
+        JLabel infoLabel = new JLabel("Capacité: " + player.getInventory().getTotalItems() +
+                "/" + player.getInventory().getMaxCapacity());
+        infoLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        centerPanel.add(infoLabel);
+        centerPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+
+        List<Item> items = player.getInventory().getItems();
+        if (items.isEmpty()) {
+            JLabel emptyLabel = new JLabel("Votre inventaire est vide.");
+            emptyLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+            centerPanel.add(emptyLabel);
+        } else {
+            // Organiser par catégorie
+            for (ItemCategory category : ItemCategory.values()) {
+                List<Item> categoryItems = player.getInventory().getItemsByCategory(category);
+
+                if (!categoryItems.isEmpty()) {
+                    JPanel categoryPanel = new JPanel();
+                    categoryPanel.setLayout(new BoxLayout(categoryPanel, BoxLayout.Y_AXIS));
+                    categoryPanel.setBorder(BorderFactory.createTitledBorder(category.getName()));
+                    categoryPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+                    for (Item item : categoryItems) {
+                        JPanel itemPanel = new JPanel();
+                        itemPanel.setLayout(new BoxLayout(itemPanel, BoxLayout.X_AXIS));
+                        itemPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+                        itemPanel.setMaximumSize(new Dimension(Short.MAX_VALUE, 40));
+
+                        int quantity = player.getInventory().getItemQuantity(item);
+                        JLabel nameLabel = new JLabel(item.getName() + " x" + quantity);
+                        nameLabel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
+
+                        JButton useButton = new JButton("Utiliser");
+                        useButton.setEnabled(false); // Désactivé pour cette version
+
+                        itemPanel.add(nameLabel);
+                        itemPanel.add(Box.createHorizontalGlue());
+                        itemPanel.add(useButton);
+
+                        categoryPanel.add(itemPanel);
+                        categoryPanel.add(Box.createRigidArea(new Dimension(0, 2)));
+                    }
+
+                    centerPanel.add(categoryPanel);
+                    centerPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+                }
+            }
+        }
+
+        centerPanel.revalidate();
+        centerPanel.repaint();
+    }
+
+    /**
+     * Charge une partie sauvegardée.
+     */
+    private void loadGame() {
+        List<String> saveGames = gameManager.listSaveGames();
+
+        if (saveGames.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                    "Aucune sauvegarde trouvée.",
+                    "Erreur", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        String[] saveArray = saveGames.toArray(new String[0]);
+        String selectedSave = (String) JOptionPane.showInputDialog(
+                this,
+                "Choisissez une sauvegarde à charger:",
+                "Charger une partie",
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                saveArray,
+                saveArray[0]
+        );
+
+        if (selectedSave != null) {
+            boolean success = gameManager.loadGame(selectedSave);
+            if (success) {
+                updateMainMenu();
+                cardLayout.show(mainPanel, "mainMenu");
+                JOptionPane.showMessageDialog(this,
+                        "Partie chargée avec succès!",
+                        "Chargement réussi", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "Erreur lors du chargement de la partie.",
+                        "Erreur", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    /**
+     * Sauvegarde la partie et quitte.
+     */
+    private void saveAndQuit() {
+        String saveName = JOptionPane.showInputDialog(
+                this,
+                "Entrez un nom pour votre sauvegarde:",
+                "Sauvegarder et quitter",
+                JOptionPane.QUESTION_MESSAGE
+        );
+
+        if (saveName != null && !saveName.trim().isEmpty()) {
+            boolean success = gameManager.saveGame(saveName);
+            if (success) {
+                JOptionPane.showMessageDialog(this,
+                        "Partie sauvegardée avec succès!",
+                        "Sauvegarde réussie", JOptionPane.INFORMATION_MESSAGE);
+                System.exit(0);
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "Erreur lors de la sauvegarde de la partie.",
+                        "Erreur", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    /**
+     * Explore une zone sauvage.
+     *
+     * @param areaId ID de la zone (1=forêt, 2=plaine, 3=grotte)
+     */
+    private void explore(int areaId) {
+        // Déterminer la zone
+        String areaName;
+        int areaLevel;
+
+        switch (areaId) {
+            case 1:
+                areaName = "Forêt Verdoyante";
+                areaLevel = 3;
+                break;
+            case 2:
+                areaName = "Plaine Ensoleillée";
+                areaLevel = 5;
+                break;
+            case 3:
+                areaName = "Grotte Humide";
+                areaLevel = 8;
+                break;
+            default:
+                return;
+        }
+
+        // Afficher un message d'exploration
+        JOptionPane.showMessageDialog(this,
+                "Vous explorez " + areaName + "...",
+                "Exploration", JOptionPane.INFORMATION_MESSAGE);
+
+        // Chance de rencontre (70%)
+        if (Math.random() < 0.7) {
+            // Créer un combat sauvage
+            com.cedric.game.core.battle.Battle wildBattle = gameManager.startWildBattle(areaLevel);
+            if (wildBattle != null) {
+                // Lancer le combat
+                new BattleDialog(this, wildBattle, true);
+            }
+        } else {
+            // Pas de rencontre, mais peut-être un objet
+            JOptionPane.showMessageDialog(this,
+                    "Vous avez exploré la zone sans rencontrer de créature.\n" +
+                            "Vous trouvez un petit trésor! +50¤",
+                    "Exploration", JOptionPane.INFORMATION_MESSAGE);
+
+            // Ajouter de l'argent
+            PlayerTrainer player = gameManager.getPlayer();
+            player.setMoney(player.getMoney() + 50);
+
+            // Mettre à jour le menu
+            updateMainMenu();
+        }
+    }
+
+    /**
+     * Défie un dresseur.
+     *
+     * @param trainer Dresseur à défier
+     */
+    private void challenge(game.characters.IATrainer trainer) {
+        // Afficher un message de défi
+        JOptionPane.showMessageDialog(this,
+                "Vous défiez " + trainer.getName() + "!",
+                "Combat de dresseurs", JOptionPane.INFORMATION_MESSAGE);
+
+        // Créer le combat
+        com.cedric.game.core.battle.Battle battle = gameManager.startTrainerBattle(trainer.getId());
+        if (battle != null) {
+            // Lancer le combat
+            new BattleDialog(this, battle, false);
+        }
+    }
+
+    /**
+     * Dialogue pour gérer un combat.
+     */
+    private class BattleDialog extends JDialog implements com.cedric.game.core.battle.BattleManager.BattleListener {
+        private com.cedric.game.core.battle.Battle battle;
+        private boolean isWildBattle;
+        private JTextArea battleLog;
+        private JPanel actionPanel;
+        private JPanel switchPanel;
+        private JPanel skillPanel;
+        private CardLayout actionCardLayout;
+
+        public BattleDialog(JFrame parent, com.cedric.game.core.battle.Battle battle, boolean isWildBattle) {
+            super(parent, "Combat", true);
+            this.battle = battle;
+            this.isWildBattle = isWildBattle;
+
+            // Enregistrer comme écouteur de bataille
+            gameManager.getBattleManager().addBattleListener(this);
+
+            // Initialiser l'interface de combat
+            initBattleUI();
+
+            // Démarrer le combat
+            battle.start();
+
+            // Afficher la boîte de dialogue
+            setSize(600, 500);
+            setLocationRelativeTo(parent);
+            setVisible(true);
+        }
+
+        private void initBattleUI() {
+            setLayout(new BorderLayout());
+
+            // Panel du haut - Informations sur les créatures
+            JPanel statusPanel = new JPanel(new GridLayout(1, 2, 10, 0));
+            statusPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+            // Créature du joueur
+            JPanel playerCreaturePanel = createCreatureStatusPanel(battle.getActiveCreatureA(), true);
+
+            // Créature adverse
+            JPanel enemyCreaturePanel = createCreatureStatusPanel(battle.getActiveCreatureB(), false);
+
+            statusPanel.add(playerCreaturePanel);
+            statusPanel.add(enemyCreaturePanel);
+
+            // Panel central - Log de combat
+            battleLog = new JTextArea();
+            battleLog.setEditable(false);
+            battleLog.setLineWrap(true);
+            battleLog.setWrapStyleWord(true);
+            JScrollPane logScrollPane = new JScrollPane(battleLog);
+            logScrollPane.setBorder(BorderFactory.createTitledBorder("Déroulement du combat"));
+
+            // Panel du bas - Actions
+            JPanel bottomPanel = new JPanel(new BorderLayout());
+
+            // Panel pour les boutons d'action
+            actionPanel = new JPanel();
+            actionCardLayout = new CardLayout();
+            actionPanel.setLayout(actionCardLayout);
+
+            // Panel principal d'action
+            JPanel mainActionPanel = new JPanel(new GridLayout(1, 4, 5, 0));
+
+            JButton attackButton = new JButton("Attaquer");
+            attackButton.addActionListener(e -> actionCardLayout.show(actionPanel, "skills"));
+
+            JButton switchButton = new JButton("Changer");
+            switchButton.addActionListener(e -> actionCardLayout.show(actionPanel, "switch"));
+
+            JButton itemButton = new JButton("Objet");
+            itemButton.setEnabled(false); // Non implémenté dans cette version
+
+            JButton fleeButton = new JButton("Fuir");
+            fleeButton.setEnabled(isWildBattle);
+            fleeButton.addActionListener(e -> tryEscape());
+
+            mainActionPanel.add(attackButton);
+            mainActionPanel.add(switchButton);
+            mainActionPanel.add(itemButton);
+            mainActionPanel.add(fleeButton);
+
+            // Panel de compétences
+            skillPanel = new JPanel(new GridLayout(0, 2, 5, 5));
+            skillPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+            updateSkillPanel();
+
+            // Panel de changement de créature
+            switchPanel = new JPanel(new GridLayout(0, 2, 5, 5));
+            switchPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+            updateSwitchPanel();
+
+            // Panel de retour
+            JPanel backPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+            JButton backButton = new JButton("Retour");
+            backButton.addActionListener(e -> actionCardLayout.show(actionPanel, "main"));
+            backPanel.add(backButton);
+
+            // Ajouter les panels d'action
+            JPanel skillActionPanel = new JPanel(new BorderLayout());
+            skillActionPanel.add(skillPanel, BorderLayout.CENTER);
+            skillActionPanel.add(backPanel, BorderLayout.SOUTH);
+
+            JPanel switchActionPanel = new JPanel(new BorderLayout());
+            switchActionPanel.add(switchPanel, BorderLayout.CENTER);
+            switchActionPanel.add(backPanel, BorderLayout.SOUTH);
+
+            actionPanel.add(mainActionPanel, "main");
+            actionPanel.add(skillActionPanel, "skills");
+            actionPanel.add(switchActionPanel, "switch");
+            actionCardLayout.show(actionPanel, "main");
+
+            bottomPanel.add(actionPanel, BorderLayout.CENTER);
+
+            // Ajouter tous les panels à la boîte de dialogue
+            add(statusPanel, BorderLayout.NORTH);
+            add(logScrollPane, BorderLayout.CENTER);
+            add(bottomPanel, BorderLayout.SOUTH);
+
+            // Afficher un message de début
+            battleLog.append("Le combat commence!\n");
+            if (isWildBattle) {
+                battleLog.append("Une créature sauvage " + battle.getActiveCreatureB().getName() +
+                        " (Niv." + battle.getActiveCreatureB().getStats().getLevel() + ") apparaît!\n");
+            } else {
+                battleLog.append("Vous affrontez un dresseur avec " +
+                        battle.getTeamB().size() + " créatures!\n");
+            }
+            battleLog.append("Vous envoyez " + battle.getActiveCreatureA().getName() + "!\n");
+        }
+
+        private JPanel createCreatureStatusPanel(Creature creature, boolean isPlayer) {
+            JPanel panel = new JPanel();
+            panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+            panel.setBorder(BorderFactory.createTitledBorder(
+                    isPlayer ? "Votre créature" : "Créature adverse"));
+
+            JLabel nameLabel = new JLabel(creature.getName());
+            nameLabel.setFont(new Font("Arial", Font.BOLD, 14));
+            nameLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+            JLabel levelLabel = new JLabel("Niveau " + creature.getStats().getLevel());
+            levelLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+            JLabel hpLabel = new JLabel("PV: " + creature.getStats().getHealth() +
+                    "/" + creature.getStats().getMaxHealth());
+            hpLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+            // Ajouter une barre de vie
+            JProgressBar hpBar = new JProgressBar(0, creature.getStats().getMaxHealth());
+            hpBar.setValue(creature.getStats().getHealth());
+            hpBar.setStringPainted(true);
+            hpBar.setString(creature.getStats().getHealth() + "/" +
+                    creature.getStats().getMaxHealth());
+            hpBar.setForeground(new Color(0, 180, 0));
+            hpBar.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+            String types = "";
+            for (Type type : creature.getStats().getTypes()) {
+                if (!types.isEmpty()) types += ", ";
+                types += type.getName();
+            }
+            JLabel typeLabel = new JLabel("Types: " + types);
+            typeLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+            // Uniquement pour la créature du joueur
+            if (isPlayer) {
+                JLabel apLabel = new JLabel("PA: " + creature.getCurrentActionPoints() +
+                        "/" + creature.getMaxActionPoints());
+                apLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+                panel.add(Box.createRigidArea(new Dimension(0, 5)));
+                panel.add(apLabel);
+            }
+
+            panel.add(nameLabel);
+            panel.add(Box.createRigidArea(new Dimension(0, 5)));
+            panel.add(levelLabel);
+            panel.add(Box.createRigidArea(new Dimension(0, 5)));
+            panel.add(hpBar);
+            panel.add(Box.createRigidArea(new Dimension(0, 5)));
+            panel.add(typeLabel);
+
+            return panel;
+        }
+
+        private void updateSkillPanel() {
+            skillPanel.removeAll();
+
+            Creature playerCreature = battle.getActiveCreatureA();
+            List<game.core.skill.Skill> skills = playerCreature.getActiveSkills();
+
+            for (game.core.skill.Skill skill : skills) {
+                JButton skillButton = new JButton(skill.getName());
+                skillButton.setToolTipText("Type: " + skill.getType().getName() +
+                        " | Puissance: " + skill.getPower() +
+                        " | PA: " + skill.getActionPointCost());
+
+                // Désactiver le bouton si pas assez de PA
+                boolean enabled = skill.getActionPointCost() <= playerCreature.getCurrentActionPoints();
+                skillButton.setEnabled(enabled);
+
+                skillButton.addActionListener(e -> executeAttack(skill));
+
+                skillPanel.add(skillButton);
+            }
+
+            skillPanel.revalidate();
+            skillPanel.repaint();
+        }
+
+        private void updateSwitchPanel() {
+            switchPanel.removeAll();
+
+            List<Creature> creatures = battle.getTeamA();
+            Creature activeCreature = battle.getActiveCreatureA();
+
+            for (int i = 0; i < creatures.size(); i++) {
+                Creature creature = creatures.get(i);
+                JButton creatureButton = new JButton(creature.getName());
+                creatureButton.setToolTipText("PV: " + creature.getStats().getHealth() +
+                        "/" + creature.getStats().getMaxHealth());
+
+                // Désactiver le bouton si c'est la créature active ou K.O.
+                boolean enabled = creature != activeCreature && !creature.isDead();
+                creatureButton.setEnabled(enabled);
+
+                if (creature == activeCreature) {
+                    creatureButton.setText(creature.getName() + " [Actif]");
+                } else if (creature.isDead()) {
+                    creatureButton.setText(creature.getName() + " [K.O.]");
+                }
+
+                final int index = i;
+                creatureButton.addActionListener(e -> switchCreature(index));
+
+                switchPanel.add(creatureButton);
+            }
+
+            switchPanel.revalidate();
+            switchPanel.repaint();
+        }
+
+        private void executeAttack(game.core.skill.Skill skill) {
+            if (!battle.isPlayerTurn()) {
+                return;
+            }
+
+            boolean success = battle.executeAttack(skill);
+            if (!success) {
+                battleLog.append("Impossible d'utiliser cette compétence!\n");
+            }
+
+            // Mise à jour des panneaux
+            updateSkillPanel();
+            updateSwitchPanel();
+        }
+
+        private void switchCreature(int index) {
+            if (!battle.isPlayerTurn()) {
+                return;
+            }
+
+            boolean success = battle.switchCreatureA(index);
+            if (!success) {
+                battleLog.append("Impossible de changer de créature!\n");
+            }
+
+            // Mise à jour des panneaux
+            updateSkillPanel();
+            updateSwitchPanel();
+        }
+
+        private void tryEscape() {
+            if (!isWildBattle || !battle.isPlayerTurn()) {
+                return;
+            }
+
+            boolean success = battle.tryEscape();
+            if (!success) {
+                battleLog.append("Impossible de fuir le combat!\n");
+            }
+        }
+
+        @Override
+        public void onBattleCreated(com.cedric.game.core.battle.Battle battle) {
+            // Non utilisé ici
+        }
+
+        @Override
+        public void onBattleCompleted(com.cedric.game.core.battle.Battle battle,
+                                      com.cedric.game.core.battle.Battle.BattleState result) {
+            // Fermer la boîte de dialogue à la fin du combat
+            dispose();
+
+            // Se désenregistrer comme écouteur
+            gameManager.getBattleManager().removeBattleListener(this);
+
+            // Mettre à jour le menu principal
+            updateMainMenu();
+
+            // Afficher un message de fin de combat
+            String message = "";
+            switch (result) {
+                case TEAM_A_VICTORY:
+                    message = "Vous avez gagné le combat!";
+                    if (isWildBattle) {
+                        // Offrir la capture pour les combats sauvages
+                        offerCapture();
+                    } else {
+                        // Récompense pour avoir battu un dresseur
+                        int rewardMoney = 100 * battle.getCurrentTurn();
+                        PlayerTrainer player = gameManager.getPlayer();
+                        player.setMoney(player.getMoney() + rewardMoney);
+                        JOptionPane.showMessageDialog(GameGUI.this,
+                                "Vous avez gagné " + rewardMoney + "¤!",
+                                "Victoire!", JOptionPane.INFORMATION_MESSAGE);
+                    }
+                    break;
+                case TEAM_B_VICTORY:
+                    message = "Vous avez perdu le combat!";
+                    JOptionPane.showMessageDialog(GameGUI.this,
+                            "Vos créatures sont fatiguées.\nElles récupèrent à moitié de leurs PV.",
+                            "Défaite", JOptionPane.INFORMATION_MESSAGE);
+                    break;
+                case ESCAPED:
+                    message = "Vous avez fui le combat!";
+                    break;
+                default:
+                    message = "Le combat est terminé.";
+                    break;
+            }
+
+            JOptionPane.showMessageDialog(GameGUI.this, message,
+                    "Fin du combat", JOptionPane.INFORMATION_MESSAGE);
+        }
+
+        @Override
+        public void onBattleMessage(String message) {
+            // Ajouter les messages au log de combat
+            battleLog.append(message + "\n");
+
+            // Faire défiler vers le bas
+            battleLog.setCaretPosition(battleLog.getDocument().getLength());
+        }
+
+        /**
+         * Offre la possibilité de capturer une créature sauvage.
+         */
+        private void offerCapture() {
+            int choice = JOptionPane.showConfirmDialog(GameGUI.this,
+                    "Voulez-vous tenter de capturer cette créature?",
+                    "Capture", JOptionPane.YES_NO_OPTION);
+
+            if (choice == JOptionPane.YES_OPTION) {
+                Creature wildCreature = battle.getActiveCreatureB();
+                boolean captured = gameManager.getPlayer().captureCreature(wildCreature, 50);
+
+                if (captured) {
+                    JOptionPane.showMessageDialog(GameGUI.this,
+                            "Félicitations! Vous avez capturé " + wildCreature.getName() + "!",
+                            "Capture réussie", JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(GameGUI.this,
+                            "La capture a échoué. La créature s'est enfuie!",
+                            "Échec de capture", JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
+        }
+    }
+}

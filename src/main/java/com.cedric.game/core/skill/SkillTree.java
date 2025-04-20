@@ -12,8 +12,8 @@ import java.util.Map;
  * Représente l'arbre de compétences d'une créature.
  */
 public class SkillTree {
-    private List<game.core.skill.SkillNode> rootNodes;
-    private Map<String, game.core.skill.SkillNode> allNodes;
+    private List<SkillNode> rootNodes;
+    private Map<String, SkillNode> allNodes;
     private Type primaryType;
 
     /**
@@ -502,3 +502,13 @@ public class SkillTree {
             calculateDepths(child, depth + 1, nodeDepths, depthCounts);
         }
     }
+
+    /**
+     * Obtient tous les nœuds de l'arbre.
+     *
+     * @return Liste de tous les nœuds
+     */
+    public List<SkillNode> getAllNodes() {
+        return new ArrayList<>(allNodes.values());
+    }
+}
