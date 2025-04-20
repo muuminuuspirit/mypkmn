@@ -1,7 +1,7 @@
-package game.core.battle;
+package com.cedric.game.core.battle;
 
-import game.core.creature.Creature;
-import game.characters.Trainer;
+import com.cedric.game.core.creature.Creature;
+import com.cedric.game.characters.Trainer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;

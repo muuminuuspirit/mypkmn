@@ -1,7 +1,7 @@
-package game.characters;
+package com.cedric.game.characters;
 
-import game.core.creature.Creature;
-import game.core.skill.Skill;
+import com.cedric.game.core.creature.Creature;
+import com.cedric.game.core.skill.Skill;
 import java.util.Random;
 
 /**

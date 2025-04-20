@@ -1,6 +1,6 @@
-package game.core.creature;
+package com.cedric.game.core.creature;
 
-import game.core.type.Type;
+import com.cedric.game.core.type.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

@@ -1,8 +1,8 @@
-package game.core.creature;
+package com.cedric.game.core.creature;
 
-import game.core.skill.Skill;
-import game.core.skill.SkillTree;
-import game.core.skill.SkillEffect;
+import com.cedric.game.core.skill.Skill;
+import com.cedric.game.core.skill.SkillTree;
+import com.cedric.game.core.skill.SkillEffect;
 import game.core.type.Type;
 import java.util.ArrayList;
 import java.util.List;

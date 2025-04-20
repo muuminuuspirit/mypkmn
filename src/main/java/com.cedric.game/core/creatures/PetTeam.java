@@ -1,4 +1,4 @@
-package game.core.creature;
+package com.cedric.game.core.creature;
 
 import java.util.ArrayList;
 import java.util.Collections;

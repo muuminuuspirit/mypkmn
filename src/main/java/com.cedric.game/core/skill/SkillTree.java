@@ -1,7 +1,7 @@
-package game.core.skill;
+package com.cedric.game.core.skill;
 
-import game.core.creature.Creature;
-import game.core.type.Type;
+import com.cedric.game.core.creature.Creature;
+import com.cedric.game.core.type.Type;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,8 +12,8 @@ import java.util.Map;
  * Représente l'arbre de compétences d'une créature.
  */
 public class SkillTree {
-    private List<SkillNode> rootNodes;
-    private Map<String, SkillNode> allNodes;
+    private List<game.core.skill.SkillNode> rootNodes;
+    private Map<String, game.core.skill.SkillNode> allNodes;
     private Type primaryType;
 
     /**

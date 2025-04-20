@@ -1,4 +1,4 @@
-package game.core.skill;
+package com.cedric.game.core.skill;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +8,7 @@ import java.util.List;
  */
 public class SkillNode {
     private String id;
-    private Skill skill;
+    private game.core.skill.Skill skill;
     private List<SkillNode> children;
     private List<SkillNode> prerequisites;
     private int pointsRequired;

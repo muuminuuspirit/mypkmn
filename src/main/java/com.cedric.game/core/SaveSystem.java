@@ -1,9 +1,9 @@
-package game.core;
+package com.cedric.game.core;
 
-import game.characters.PlayerTrainer;
-import game.core.creature.Creature;
-import game.items.Item;
-import game.items.Inventory;
+import com.cedric.game.characters.PlayerTrainer;
+import com.cedric.game.core.creature.Creature;
+import com.cedric.game.items.Item;
+import com.cedric.game.items.Inventory;
 
 import java.io.*;
 import java.util.ArrayList;

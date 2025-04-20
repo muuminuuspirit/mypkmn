@@ -1,4 +1,4 @@
-package game.items;
+package com.cedric.game.items;
 
 import java.util.HashMap;
 import java.util.Map;

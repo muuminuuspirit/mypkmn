@@ -1,7 +1,7 @@
-package game.core.skill;
+package com.cedric.game.core.skill;
 
-import game.core.creature.Creature;
-import game.core.type.Type;
+import com.cedric.game.core.creature.Creature;
+import com.cedric.game.core.type.Type;
 import java.util.ArrayList;
 import java.util.List;
 

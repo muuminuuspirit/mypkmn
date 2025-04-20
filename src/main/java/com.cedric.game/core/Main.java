@@ -1,10 +1,10 @@
-package game.core;
+package com.cedric.game.core;
 
-import game.core.creature.Creature;
-import game.core.type.Type;
-import game.core.battle.Battle;
-import game.core.battle.BattleManager;
-import game.characters.PlayerTrainer;
+import com.cedric.game.core.creature.Creature;
+import com.cedric.game.core.type.Type;
+import com.cedric.game.core.battle.Battle;
+import com.cedric.game.core.battle.BattleManager;
+import com.cedric.game.characters.PlayerTrainer;
 
 import java.util.List;
 import java.util.Scanner;

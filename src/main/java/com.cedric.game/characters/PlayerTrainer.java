@@ -1,6 +1,6 @@
-package game.characters;
+package com.cedric.game.characters;
 
-import game.core.creature.Creature;
+import com.cedric.game.core.creature.Creature;
 import game.items.Item;
 
 /**

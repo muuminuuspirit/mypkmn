@@ -1,7 +1,7 @@
 package game;
 
-import game.ui.GameGUI;
-import game.core.SaveSystem;
+import com.cedric.game.ui.GameGUI;
+import com.cedric.game.core.SaveSystem;
 
 /**
  * Lanceur principal du jeu de créatures.

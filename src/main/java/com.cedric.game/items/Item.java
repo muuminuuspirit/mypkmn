@@ -1,7 +1,7 @@
-package game.items;
+package com.cedric.game.items;
 
-import game.core.creature.Creature;
-import game.characters.Trainer;
+import com.cedric.game.core.creature.Creature;
+import com.cedric.game.characters.Trainer;
 
 /**
  * Représente un objet du jeu.

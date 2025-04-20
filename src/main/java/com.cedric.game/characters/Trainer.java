@@ -1,8 +1,8 @@
-package game.characters;
+package com.cedric.game.characters;
 
-import game.core.creature.Creature;
-import game.items.Inventory;
-import game.items.Item;
+import com.cedric.game.core.creature.Creature;
+import com.cedric.game.items.Inventory;
+import com.cedric.game.items.Item;
 
 import java.util.ArrayList;
 import java.util.List;

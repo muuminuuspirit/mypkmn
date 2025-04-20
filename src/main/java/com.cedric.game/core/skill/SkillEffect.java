@@ -1,6 +1,6 @@
-package game.core.skill;
+package com.cedric.game.core.skill;
 
-import game.core.creature.Creature;
+import com.cedric.game.core.creature.Creature;
 
 /**
  * Représente un effet appliqué par une compétence.

@@ -1,8 +1,8 @@
-package com.cedric.game;
+package com.cedric.game.ui;
 
-import game.characters.PlayerTrainer;
-import game.core.GameManager;
-import game.core.creature.Creature;
+import com.cedric.game.characters.PlayerTrainer;
+import com.cedric.game.core.GameManager;
+import com.cedric.game.core.creature.Creature;
 
 import javax.swing.*;
 import java.awt.*;

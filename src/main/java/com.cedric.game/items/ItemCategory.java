@@ -1,4 +1,4 @@
-package game.items;
+package com.cedric.game.items;
 
 /**
  * Énumération des catégories d'objets.

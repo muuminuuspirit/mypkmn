@@ -1,4 +1,4 @@
-package game.core.type;
+package com.cedric.game.core.type;
 
 import java.util.ArrayList;
 import java.util.HashMap;
